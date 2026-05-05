@@ -46,4 +46,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function vendor() { return $this->hasOne(Vendor::class); }
+    public function bids() { return $this->hasMany(Bid::class); }
+
+    public function scopeWithActiveBidCount(Builder $query): void
+    {
+        $query->withCount(['bids as active_bids_count' => function (Builder $bidsQuery) {
+            // Count bids only where the related auction is currently live
+            $bidsQuery->whereHas('auction', function (Builder $auctionQuery) {
+                $auctionQuery->live();
+            });
+        }]);
+    }
 }
