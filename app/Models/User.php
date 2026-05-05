@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -53,10 +52,15 @@ class User extends Authenticatable
     public function scopeWithActiveBidCount(Builder $query): void
     {
         $query->withCount(['bids as active_bids_count' => function (Builder $bidsQuery) {
-            // Count bids only where the related auction is currently live
             $bidsQuery->whereHas('auction', function (Builder $auctionQuery) {
                 $auctionQuery->live();
             });
         }]);
+    }
+
+    public function watchlistedAuctions()
+    {
+        return $this->belongsToMany(Auction::class, 'watchlists')
+                    ->withPivot('notify_at_close');
     }
 }
