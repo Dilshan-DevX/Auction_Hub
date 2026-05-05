@@ -19,7 +19,6 @@ class Bid extends Model
     public function user() { return $this->belongsTo(User::class); }
     public function auction() { return $this->belongsTo(Auction::class); }
 
-    // Correlated subquery to find the max amount for this specific row's auction
     public function scopeWinning(Builder $query): void
     {
         $query->where('amount', function ($subquery) {
