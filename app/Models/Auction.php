@@ -13,6 +13,11 @@ class Auction extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'vendor_id', 'category_id', 'starts_at', 'ends_at',
+        'reserve_price', 'current_price', 'bid_increment', 'status',
+    ];
+
     protected function casts(): array
     {
         return [
