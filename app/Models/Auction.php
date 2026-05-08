@@ -16,6 +16,7 @@ class Auction extends Model
     protected $fillable = [
         'vendor_id', 'category_id', 'starts_at', 'ends_at',
         'reserve_price', 'current_price', 'bid_increment', 'status',
+        'settled_at',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class Auction extends Model
             'reserve_price' => MoneyCast::class,
             'current_price' => MoneyCast::class,
             'bid_increment' => MoneyCast::class,
+            'settled_at' => 'datetime',
         ];
     }
 

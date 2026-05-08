@@ -38,9 +38,7 @@ return new class extends Migration
             $table->decimal('bid_increment', 12, 2);
             $table->enum('status', ['draft', 'scheduled', 'live', 'ended', 'cancelled']);
 
-            // Virtual column: computed in SQL (deterministic).
-            // MySQL forbids non-deterministic functions like NOW() in generated columns.
-            // The time-window check (starts_at/ends_at) is enforced by Auction::scopeLive().
+          
             $table->boolean('is_live')->virtualAs("(status = 'live')");
 
             $table->softDeletes();
