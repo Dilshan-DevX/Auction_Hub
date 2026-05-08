@@ -14,11 +14,11 @@ class MockGateway implements PaymentGatewayContract
 
     public function capture(string $ref)
     {
-        // Mock capture logic
+
     }
 
     public function refund(string $ref)
     {
-        // Mock refund logic
+
     }
 }

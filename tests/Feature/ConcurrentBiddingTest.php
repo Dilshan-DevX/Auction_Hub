@@ -53,9 +53,6 @@ class ConcurrentBiddingTest extends TestCase
         ]);
     }
 
-    /**
-     * Two parallel bids of identical value cause exactly ONE to win.
-     */
     public function test_parallel_identical_bids_only_one_wins(): void
     {
         $user1 = User::create([
@@ -76,13 +73,11 @@ class ConcurrentBiddingTest extends TestCase
             'deposit_balance' => 1000,
         ]);
 
-        // First bid succeeds
         $response1 = $this->actingAs($user1)->postJson("/api/auctions/{$this->auction->id}/bids", [
             'amount' => 110,
         ]);
         $response1->assertStatus(201);
 
-        // Second bid with same amount fails because current_price is now 110
         $response2 = $this->actingAs($user2)->postJson("/api/auctions/{$this->auction->id}/bids", [
             'amount' => 110,
         ]);
@@ -92,9 +87,6 @@ class ConcurrentBiddingTest extends TestCase
         $this->assertEquals(110, $this->auction->fresh()->getRawOriginal('current_price'));
     }
 
-    /**
-     * A bid below minimum_next_bid returns 422 with the correct error key.
-     */
     public function test_bid_below_minimum_returns_422(): void
     {
         $user = User::create([
@@ -111,13 +103,9 @@ class ConcurrentBiddingTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        // Correct error key for validation failure is usually in 'errors'
         $response->assertJsonValidationErrors(['amount']);
     }
 
-    /**
-     * A self-bid by vendor on own auction returns 403.
-     */
     public function test_self_bid_returns_403(): void
     {
         $response = $this->actingAs($this->vendorUser)->postJson("/api/auctions/{$this->auction->id}/bids", [
@@ -127,12 +115,8 @@ class ConcurrentBiddingTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /**
-     * On a winning bid, BidPlaced is dispatched exactly once.
-     */
     public function test_winning_bid_dispatches_event_once(): void
     {
-        // Use fake only for the specific event to avoid interfering with other system events if any
         Event::fake([BidPlaced::class]);
 
         $user = User::create([
@@ -153,9 +137,6 @@ class ConcurrentBiddingTest extends TestCase
         Event::assertDispatched(BidPlaced::class, 1);
     }
 
-    /**
-     * A bid from a non-KYC user is rejected with 403 BEFORE hitting the controller.
-     */
     public function test_non_kyc_user_rejected_with_403(): void
     {
         $user = User::create([

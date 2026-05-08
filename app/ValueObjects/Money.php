@@ -9,7 +9,7 @@ class Money
         public readonly string $currency = 'USD'
     ) {}
 
-    // Helper to get the decimal format for the DB
+
     public function toDecimal(): float
     {
         return $this->cents / 100;

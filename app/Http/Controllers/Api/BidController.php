@@ -12,17 +12,8 @@ use Illuminate\Database\QueryException;
 
 class BidController extends Controller
 {
-    /**
-     * POST /api/auctions/{auction}/bids
-     * Authenticated bidders. Returns:
-     *   409 on race-condition loss
-     *   422 on invalid amount
-     *   403 on self-bid
-     *   201 on success
-     */
     public function store(StoreBidRequest $request, Auction $auction)
     {
-        // B.3: Authorise via Gate (BidPolicy::place)
         Gate::authorize('place', [new Bid(), $auction]);
 
         $bid = new Bid();
@@ -34,7 +25,6 @@ class BidController extends Controller
         try {
             $saved = $bid->save();
         } catch (QueryException $e) {
-            // Unique constraint violation → race condition (duplicate user+auction+amount)
             if ($e->getCode() === '23000') {
                 return response()->json([
                     'message' => 'Race condition: another identical bid was placed first.',
@@ -43,9 +33,7 @@ class BidController extends Controller
             throw $e;
         }
 
-        // BidObserver::creating() returns false if validation fails
         if (! $saved) {
-            // Determine the specific reason for failure
             $freshAuction = Auction::find($auction->id);
 
             if (! $freshAuction || $freshAuction->status !== 'live') {
@@ -64,7 +52,6 @@ class BidController extends Controller
                 ], 422);
             }
 
-            // Fallback: generic failure (deposit insufficient, etc.)
             return response()->json([
                 'message' => 'Bid could not be placed. Check your deposit balance.',
             ], 422);

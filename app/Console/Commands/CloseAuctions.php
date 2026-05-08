@@ -36,12 +36,7 @@ class CloseAuctions extends Command
             ->chunkById(100, function ($auctions) use (&$hasFailures) {
                 foreach ($auctions as $auction) {
                     try {
-                        // Dispatch the event which will trigger settlement logic
                         AuctionEnded::dispatch($auction);
-                        
-                        // We assume the event listener handles the status update or other logic.
-                        // However, the requirement says "processes them", and usually "closing" means changing status.
-                        // If the listener handles it, we just dispatch.
                     } catch (Throwable $e) {
                         $hasFailures = true;
                         Log::error("Failed to close auction {$auction->id}", [

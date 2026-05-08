@@ -12,9 +12,6 @@ class RefundController extends Controller
         protected readonly PaymentGatewayContract $gateway
     ) {}
 
-    /**
-     * Refund a payment.
-     */
     public function refund(Request $request, string $ref)
     {
         $this->gateway->refund($ref);
