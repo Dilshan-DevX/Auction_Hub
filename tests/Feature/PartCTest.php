@@ -100,15 +100,13 @@ test('C.1: BidPlaced event notifies previous high bidder', function () {
 test('C.1: AuctionEnded settles auction correctly', function () {
     $data = seedTestCData();
 
-    // Bidders place bids (holds deducted in observer)
-    // Bidder 1: 200.00 -> hold 20.00
     $bid1 = Bid::create([
         'user_id' => $data['bidder1']->id,
         'auction_id' => $data['auction']->id,
         'amount' => 200.00,
     ]);
 
-    // Bidder 2: 250.00 -> hold 25.00 (winner)
+    
     $bid2 = Bid::create([
         'user_id' => $data['bidder2']->id,
         'auction_id' => $data['auction']->id,
@@ -118,13 +116,13 @@ test('C.1: AuctionEnded settles auction correctly', function () {
     $data['bidder1']->refresh();
     $data['bidder2']->refresh();
 
-    expect((float)$data['bidder1']->getRawOriginal('deposit_balance'))->toBe(980.00); // 1000 - 20
-    expect((float)$data['bidder2']->getRawOriginal('deposit_balance'))->toBe(975.00); // 1000 - 25
+    expect((float)$data['bidder1']->getRawOriginal('deposit_balance'))->toBe(980.00);
+    expect((float)$data['bidder2']->getRawOriginal('deposit_balance'))->toBe(975.00); 
 
-    // Let's adjust commission for easier verification and test in one go
-    $data['vendor']->update(['commission_rate' => 0.05]); // 5%
     
-    // End auction and settle
+    $data['vendor']->update(['commission_rate' => 0.05]); 
+    
+   
     $data['auction']->update(['status' => 'ended']);
     AuctionEnded::dispatch($data['auction']);
 
@@ -133,11 +131,9 @@ test('C.1: AuctionEnded settles auction correctly', function () {
     $data['bidder2']->refresh();
     $data['auction']->refresh();
 
-    // Bidder 1 (loser) hold 20.00 released. 980 + 20 = 1000.
+    
     expect((float)$data['bidder1']->getRawOriginal('deposit_balance'))->toBe(1000.00);
 
-    // Winner's hold was 25.00. Commission is 5% of 250.00 = 12.50.
-    // Vendor payout = hold - commission = 25 - 12.50 = 12.50.
     expect((float)$data['vendorUser']->getRawOriginal('deposit_balance'))->toBe(12.50);
     
     expect($data['auction']->settled_at)->not->toBeNull();
@@ -146,20 +142,19 @@ test('C.1: AuctionEnded settles auction correctly', function () {
 test('C.1: SettleAuction handles auction with no bids', function () {
     $data = seedTestCData();
 
-    // No bids placed
+
     $data['auction']->update(['status' => 'ended']);
     AuctionEnded::dispatch($data['auction']);
 
     $data['auction']->refresh();
     expect($data['auction']->settled_at)->not->toBeNull();
-    // No payouts/refunds happen, balance stays 0
+  
     expect((float)$data['vendorUser']->getRawOriginal('deposit_balance'))->toBe(0.0);
 });
 
 test('C.2: auction:close-live command marks live auctions as ended', function () {
     $data = seedTestCData();
 
-    // Auction past its end time
     $data['auction']->update(['ends_at' => now()->subMinute()]);
 
     $this->artisan('auction:close-live')
