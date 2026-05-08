@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Vendor extends Model
 {
+    protected $fillable = [
+        'user_id', 'store_slug', 'commission_rate', 'approved_at',
+    ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

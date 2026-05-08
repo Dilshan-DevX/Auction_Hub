@@ -16,11 +16,16 @@ class MoneyCast implements CastsAttributes
 
     public function set(Model $model, string $key, mixed $value, array $attributes): float
     {
-        if (! $value instanceof Money) {
-            throw new InvalidArgumentException('The given value is not a Money instance.');
+        if ($value instanceof Money) {
+            // Convert the integer cents back to decimal for the DB
+            return $value->toDecimal();
         }
 
-        // Convert the integer cents back to decimal for the DB
-        return $value->toDecimal();
+        // Accept raw numeric values (e.g., from seeding, mass assignment)
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        throw new InvalidArgumentException('The given value must be a Money instance or numeric.');
     }
 }

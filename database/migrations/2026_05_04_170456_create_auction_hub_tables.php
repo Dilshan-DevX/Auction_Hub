@@ -29,8 +29,8 @@ return new class extends Migration
 
         Schema::create('auctions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vendor_id')->constrained();
-            $table->foreignId('category_id')->constrained();
+            $table->foreignId('vendor_id')->constrained()->onDelete('cascade');
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->timestamp('starts_at');
             $table->timestamp('ends_at');
             $table->decimal('reserve_price', 12, 2);
@@ -38,7 +38,10 @@ return new class extends Migration
             $table->decimal('bid_increment', 12, 2);
             $table->enum('status', ['draft', 'scheduled', 'live', 'ended', 'cancelled']);
 
-            $table->boolean('is_live')->virtualAs("status = 'live'");
+            // Virtual column: computed in SQL (deterministic).
+            // MySQL forbids non-deterministic functions like NOW() in generated columns.
+            // The time-window check (starts_at/ends_at) is enforced by Auction::scopeLive().
+            $table->boolean('is_live')->virtualAs("(status = 'live')");
 
             $table->softDeletes();
             $table->timestamps();
@@ -46,11 +49,12 @@ return new class extends Migration
 
         Schema::create('bids', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('auction_id')->constrained();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('auction_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 12, 2);
             $table->timestamp('placed_at')->useCurrent();
             $table->unique(['user_id', 'auction_id', 'amount']);
+            $table->timestamps();
         });
 
         Schema::create('attachments', function (Blueprint $table) {
@@ -61,8 +65,8 @@ return new class extends Migration
         });
 
         Schema::create('watchlists', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('auction_id')->constrained();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('auction_id')->constrained()->onDelete('cascade');
             $table->boolean('notify_at_close')->default(false);
             $table->primary(['user_id', 'auction_id']);
         });

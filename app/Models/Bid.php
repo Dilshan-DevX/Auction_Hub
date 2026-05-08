@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Bid extends Model
 {
+    protected $fillable = [
+        'user_id', 'auction_id', 'amount', 'placed_at',
+    ];
     protected function casts(): array
     {
         return [
