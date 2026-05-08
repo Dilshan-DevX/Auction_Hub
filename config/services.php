@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'gateway' => [
+        'driver' => env('GATEWAY_DRIVER', 'mock'),
+    ],
+
 ];

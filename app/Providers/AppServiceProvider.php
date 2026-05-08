@@ -21,7 +21,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(\App\Contracts\PaymentGatewayContract::class, function ($app) {
+            $driver = config('services.gateway.driver');
+            
+            return match ($driver) {
+                'stripe' => new \App\Services\StripeGateway(),
+                default => new \App\Services\MockGateway(),
+            };
+        });
+
+        $this->app->when(\App\Http\Controllers\Admin\RefundController::class)
+            ->needs(\App\Contracts\PaymentGatewayContract::class)
+            ->give(\App\Services\MockGateway::class);
     }
 
     /**

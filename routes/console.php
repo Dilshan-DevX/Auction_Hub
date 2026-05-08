@@ -1,5 +1,13 @@
 <?php
 
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('auctions:close')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->onOneServer()
+    ->runInBackground();
+
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 

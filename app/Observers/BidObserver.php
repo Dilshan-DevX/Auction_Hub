@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Bid;
 use App\Models\Auction;
 use App\Models\User;
+use App\Events\BidPlaced;
 use Illuminate\Support\Facades\DB;
 
 class BidObserver
@@ -94,5 +95,14 @@ class BidObserver
 
             return true;
         });
+    }
+
+    /**
+     * Handle the Bid "created" event.
+     * Dispatches BidPlaced event after the bid is persisted.
+     */
+    public function created(Bid $bid): void
+    {
+        BidPlaced::dispatch($bid);
     }
 }
